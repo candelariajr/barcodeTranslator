@@ -41,8 +41,7 @@ function valid_barcode($string_barcode) {
 		//debug_to_JSON($string_barcode . " " . strlen($string_barcode));
 		return preg_match("/^[0-9]{12}[^']{1}/", $string_barcode);
 	}
-	//debug_to_JSON($string_barcode . " " . strlen($string_barcode));
-	return true;
+	return false;
 }// end function valid_barcode
 //read the raw body contents
 $str_json = file_get_contents('php://input');
