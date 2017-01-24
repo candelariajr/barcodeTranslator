@@ -8,17 +8,41 @@
  * THIS APP MUST USE A NON-ADMINISTRATIVE SELECT ONLY ACCOUNT!
  * */
 
+$debugArray = [];
+
+/*
+ * debug_to_JSON function
+ * @input data- value to be displayed in console
+ * @returns- nothing
+ *
+ * This function takes a given file and appends it to a string Array that is returned to the client in
+ * the array 'debug_messages' component of the JSON reply to the POST request. This is the most useful
+ * means of getting data from this application as there are no debug features built into the script.
+ */
+function debug_to_JSON( $data ) {
+	if(is_array($data)){
+		$output = "<script>console.log( 'Debug Objects: " . implode( ',', $data) . "' );</script>";
+	}
+	else{
+		$output = "<script>console.log( 'Debug Objects: " . $data . "' );</script>";
+	}
+	GLOBAL $debugArray;
+	array_push($debugArray, $data);
+}
 
 function valid_barcode($string_barcode) {
 	//NOTE! THIS FUNCTION WILL BE DIFFERENT FOR EVERY INSTITUTION USING THIS SCRIPT!
 	
-	if(sizeof($string_barcode) == 12){
+	if(strlen($string_barcode) == 12){
+		//debug_to_JSON($string_barcode . " " . strlen($string_barcode));
 		return preg_match("/^[0-9]{12}/", $string_barcode);
 	}
-	else if(sizeof($string_barcode) == 13){
+	else if(strlen($string_barcode) == 13){
+		//debug_to_JSON($string_barcode . " " . strlen($string_barcode));
 		return preg_match("/^[0-9]{12}[^']{1}/", $string_barcode);
 	}
-	return false;
+	//debug_to_JSON($string_barcode . " " . strlen($string_barcode));
+	return true;
 }// end function valid_barcode
 //read the raw body contents
 $str_json = file_get_contents('php://input');
@@ -54,8 +78,7 @@ if ($data !== NULL) {
 	  l.bib_record_id = b.id
 	WHERE
 	(e.index_tag || e.index_entry) in 
-	(
-	";
+	(";
 	
 	//collect invalid barcodes
 	$invalid_barcodes = [];
@@ -98,14 +121,6 @@ catch ( PDOException $e ) {
 	error_log("{\"error\" : \"PDO Exception: " . $e->getMessage() . "\"}");
 	exit(1);
 }
-//$host = "sierra-db.wncln.wncln.org";
-//$user = "candelariajr";
-//$pass = "candelariajr305";
-//$db = "iii";
-//$port = "1032";
-
-
-
 
 //set output to utf-8
 $connection->query('SET NAMES UNICODE');
@@ -116,6 +131,8 @@ $row = $statement->fetchAll(PDO::FETCH_ASSOC);
 $encode_array['data_input_size'] = $data_input_size;
 $encode_array['data_output_size'] = count($row);
 $encode_array['invalid_barcodes'] = $invalid_barcodes;
+$encode_array['debug_messages'] = $debugArray;
 $encode_array['data'] = $row;
 header('Content-Type: application/json');
 echo json_encode($encode_array);
+

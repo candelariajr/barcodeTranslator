@@ -104,6 +104,10 @@ See Sierra documentation here: <br />
 			for(var i=0; i<json_return_data.invalid_barcodes.length; i++) {
 				bad_barcodes_output.value += json_return_data.invalid_barcodes[i] + "\n";
 			}
+
+			for(var d=0; d<json_return_data.debug_messages.length; d++){
+				console.log(json_return_data.debug_messages[d]);
+			}
 			
 	} // end function fill_outputs
 	
